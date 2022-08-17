@@ -1,0 +1,165 @@
+(function () {
+}());
+import _0x50b3d4 from './LinkedListNode';
+import _0x2c139c from '../../utils/comparator/Comparator';
+export default class LinkedList {
+    constructor(_0x1e9260) {
+        this.head = null;
+        this.tail = null;
+        this.compare = new _0x2c139c(_0x1e9260);
+    }
+    prepend(_0x16805c) {
+        const _0x22f81e = new _0x50b3d4(_0x16805c, this.head);
+        this.head = _0x22f81e;
+        if (!this.tail) {
+            this.tail = _0x22f81e;
+        }
+        return this;
+    }
+    append(_0x2ff615) {
+        const _0x28e621 = new _0x50b3d4(_0x2ff615);
+        if (!this.head) {
+            this.head = _0x28e621;
+            this.tail = _0x28e621;
+            return this;
+        }
+        this.tail.next = _0x28e621;
+        this.tail = _0x28e621;
+        return this;
+    }
+    insert(_0x589b3c, _0x159227) {
+        const _0x33d6b2 = _0x159227 < 0 ? 0 : _0x159227;
+        if (_0x33d6b2 === 0) {
+            this.prepend(_0x589b3c);
+        } else {
+            let _0x2f2ffc = 1;
+            let _0x324033 = this.head;
+            const _0x304c16 = new _0x50b3d4(_0x589b3c);
+            while (_0x324033) {
+                if (_0x2f2ffc === _0x33d6b2) {
+                    break;
+                }
+                _0x324033 = _0x324033.next;
+                _0x2f2ffc += 1;
+            }
+            if (_0x324033) {
+                _0x304c16.next = _0x324033.next;
+                _0x324033.next = _0x304c16;
+            } else {
+                if (this.tail) {
+                    this.tail.next = _0x304c16;
+                    this.tail = _0x304c16;
+                } else {
+                    this.head = _0x304c16;
+                    this.tail = _0x304c16;
+                }
+            }
+        }
+        return this;
+    }
+    delete(_0x2fa700) {
+        if (!this.head) {
+            return null;
+        }
+        let _0xfcfa8b = null;
+        while (this.head && this.compare.equal(this.head.value, _0x2fa700)) {
+            _0xfcfa8b = this.head;
+            this.head = this.head.next;
+        }
+        let _0x5bc736 = this.head;
+        if (_0x5bc736 !== null) {
+            while (_0x5bc736.next) {
+                if (this.compare.equal(_0x5bc736.next.value, _0x2fa700)) {
+                    _0xfcfa8b = _0x5bc736.next;
+                    _0x5bc736.next = _0x5bc736.next.next;
+                } else {
+                    _0x5bc736 = _0x5bc736.next;
+                }
+            }
+        }
+        if (this.compare.equal(this.tail.value, _0x2fa700)) {
+            this.tail = _0x5bc736;
+        }
+        return _0xfcfa8b;
+    }
+    find({
+        value: value = undefined,
+        callback: callback = undefined
+    }) {
+        if (!this.head) {
+            return null;
+        }
+        let _0x39fe87 = this.head;
+        while (_0x39fe87) {
+            if (callback && callback(_0x39fe87.value)) {
+                return _0x39fe87;
+            }
+            if (value !== undefined && this.compare.equal(_0x39fe87.value, value)) {
+                return _0x39fe87;
+            }
+            _0x39fe87 = _0x39fe87.next;
+        }
+        return null;
+    }
+    deleteTail() {
+        const _0x419246 = this.tail;
+        if (this.head === this.tail) {
+            this.head = null;
+            this.tail = null;
+            return _0x419246;
+        }
+        let _0x2f695e = this.head;
+        while (_0x2f695e.next) {
+            if (!_0x2f695e.next.next) {
+                _0x2f695e.next = null;
+            } else {
+                _0x2f695e = _0x2f695e.next;
+            }
+        }
+        this.tail = _0x2f695e;
+        return _0x419246;
+    }
+    deleteHead() {
+        if (!this.head) {
+            return null;
+        }
+        const _0x3897c2 = this.head;
+        if (this.head.next) {
+            this.head = this.head.next;
+        } else {
+            this.head = null;
+            this.tail = null;
+        }
+        return _0x3897c2;
+    }
+    fromArray(_0x4edb3c) {
+        _0x4edb3c.forEach(_0x44145a => this.append(_0x44145a));
+        return this;
+    }
+    toArray() {
+        const _0x2e07f7 = [];
+        let _0x41deb7 = this.head;
+        while (_0x41deb7) {
+            _0x2e07f7.push(_0x41deb7);
+            _0x41deb7 = _0x41deb7.next;
+        }
+        return _0x2e07f7;
+    }
+    toString(_0x438a4d) {
+        return this.toArray().map(_0x14518e => _0x14518e.toString(_0x438a4d)).toString();
+    }
+    reverse() {
+        let _0x2092f8 = this.head;
+        let _0x5dfce9 = null;
+        let _0x1b73bc = null;
+        while (_0x2092f8) {
+            _0x1b73bc = _0x2092f8.next;
+            _0x2092f8.next = _0x5dfce9;
+            _0x5dfce9 = _0x2092f8;
+            _0x2092f8 = _0x1b73bc;
+        }
+        this.tail = this.head;
+        this.head = _0x5dfce9;
+        return this;
+    }
+}

@@ -1,0 +1,18 @@
+(function () {
+    var _0x65977d = 2;
+    var _0x4c96d8 = '53';
+    var _0x56d39b = '5-2';
+    var _0x544285 = [
+        '10',
+        '10',
+        '10',
+        '10',
+        '10'
+    ].map(parseInt);
+    var _0x101028 = 'foo 11';
+    console.log(_0x65977d);
+    console.log(_0x4c96d8);
+    console.log(_0x56d39b);
+    console.log(_0x544285);
+    console.log(_0x101028);
+}());

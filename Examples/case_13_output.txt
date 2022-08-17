@@ -1,0 +1,20 @@
+(function () {
+    (function () {
+    }());
+    var _0x29b1a3 = 2;
+    var _0x27a46d = '53';
+    var _0xca1752 = '5-2';
+    var _0x412db5 = [
+        '10',
+        '10',
+        '10',
+        '10',
+        '10'
+    ].map(parseInt);
+    var _0x4d1e25 = 'foo 11';
+    console.log(_0x29b1a3);
+    console.log(_0x27a46d);
+    console.log(_0xca1752);
+    console.log(_0x412db5);
+    console.log(_0x4d1e25);
+}());

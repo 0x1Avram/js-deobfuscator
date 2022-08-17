@@ -1,0 +1,22 @@
+eval('console.log(5);');
+eval('console.log(5);');
+eval('console.log(5);');
+console.log(6);
+(function () {
+    var _0x1581e1 = 2;
+    var _0x299c37 = '53';
+    var _0x576e1a = '5-2';
+    var _0x5ea38c = [
+        '10',
+        '10',
+        '10',
+        '10',
+        '10'
+    ].map(parseInt);
+    var _0x45b774 = 'foo 11';
+    console.log(_0x1581e1);
+    console.log(_0x299c37);
+    console.log(_0x576e1a);
+    console.log(_0x5ea38c);
+    console.log(_0x45b774);
+}());

@@ -1,0 +1,80 @@
+/*
+Copyright (C) 2016-2022 Timofey Kachalov.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+const a0b = function (a, b) {
+    a = a - 0x0;
+    let c = a0a[a];
+    if (a0b['oOjGKp'] === undefined) {
+        (function () {
+            const f = function () {
+                let i;
+                try {
+                    i = Function('return\x20(function()\x20' + '{}.constructor(\x22return\x20this\x22)(\x20)' + ');')();
+                } catch (j) {
+                    i = window;
+                }
+                return i;
+            };
+            const g = f();
+            const h = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+            g['atob'] || (g['atob'] = function (i) {
+                const j = String(i)['replace'](/=+$/, '');
+                let k = '';
+                for (let l = 0x0, m, n, o = 0x0; n = j['charAt'](o++); ~n && (m = l % 0x4 ? m * 0x40 + n : n, l++ % 0x4) ? k += String['fromCharCode'](0xff & m >> (-0x2 * l & 0x6)) : 0x0) {
+                    n = h['indexOf'](n);
+                }
+                return k;
+            });
+        }());
+        const e = function (f, g) {
+            let h = [], l = 0x0, m, n = '', o = '';
+            f = atob(f);
+            for (let q = 0x0, r = f['length']; q < r; q++) {
+                o += '%' + ('00' + f['charCodeAt'](q)['toString'](0x10))['slice'](-0x2);
+            }
+            f = decodeURIComponent(o);
+            let p;
+            for (p = 0x0; p < 0x100; p++) {
+                h[p] = p;
+            }
+            for (p = 0x0; p < 0x100; p++) {
+                l = (l + h[p] + g['charCodeAt'](p % g['length'])) % 0x100;
+                m = h[p];
+                h[p] = h[l];
+                h[l] = m;
+            }
+            p = 0x0;
+            l = 0x0;
+            for (let t = 0x0; t < f['length']; t++) {
+                p = (p + 0x1) % 0x100;
+                l = (l + h[p]) % 0x100;
+                m = h[p];
+                h[p] = h[l];
+                h[l] = m;
+                n += String['fromCharCode'](f['charCodeAt'](t) ^ h[(h[p] + h[l]) % 0x100]);
+            }
+            return n;
+        };
+        a0b['vqowNY'] = e;
+        a0b['YKLmJR'] = {};
+        a0b['oOjGKp'] = !![];
+    }
+    const d = a0b['YKLmJR'][a];
+    if (d === undefined) {
+        if (a0b['WQBLvi'] === undefined) {
+            a0b['WQBLvi'] = !![];
+        }
+        c = a0b['vqowNY'](c, b);
+        a0b['YKLmJR'][a] = c;
+    } else {
+        c = d;
+    }
+    return c;
+};

@@ -1,0 +1,2 @@
+stringarray auto detection: node index.js -i case_02_input_newestoptionandeval.txt -o case_02_output.txt
+With stringarray input: node index.js -i case_02_input_newestoptionandeval.txt -o case_02_output_with_stringarray_input.txt -s case_02_stringarray.txt -w case_02_stringarraywrappers.txt -n _0x471d,_0x9cad,_0x4cd9 -r case_02_stringarrayrotate.txt

@@ -1,0 +1,2 @@
+stringarray auto detection: node index.js -i case_01_input_stringarraywithoutwrappers.txt -o case_01_output.txt
+With stringarray input: node index.js -i case_01_input_stringarraywithoutwrappers.txt -o case_01_output_with_stringarray_input.txt -s case_01_stringarray.txt -w case_01_stringarraywrappers.txt -n _0x33e4 -r case_01_stringarrayrotate.txt
