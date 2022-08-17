@@ -20,7 +20,7 @@ npm install
 
 
 ## Binaries
-I included binaries built for Windows/Linux in the 'Binaries' folder inside a zip file (for the windows one, you will need to add the proper '.exe' extension in order to use it). Those binaries where built using pkg and can be run on a system standalone, without the need to install node.js or any other dependencies.
+I included binaries built for Windows/Linux in the release section (for the windows one, you will need to add the proper '.exe' extension in order to use it). Those binaries where built using pkg and can be run on a system standalone, without the need to install node.js or any other dependencies.
 
 Their respective SHA256 hashes are:
 ```
