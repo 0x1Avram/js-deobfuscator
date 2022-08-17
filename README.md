@@ -2,7 +2,7 @@
 Deobfuscator for [Timofey Kachalov's](https://github.com/sanex3339) [javascript-obfuscator](https://github.com/javascript-obfuscator/javascript-obfuscator) - also available at [obfuscator.io](https://obfuscator.io/).
 
 # :warning: !!! WARNING !!!
-The code here is not secure. It uses 'eval' for convenience purposes and could easily be exploited by someone with malicious intent. That is why this should only be used in secure and isolated environments. Under no circumstances should anyone run this on a real environment - use a virtual machine or something to protect your system !!!
+The code here is not secure. It uses 'eval' for convenience purposes and could easily be exploited by someone with malicious intent. That is why this should only be used in secure and isolated environments. Under no circumstances should anyone run this on a real environment - at least, use a virtual machine or something to protect your system !!!
 
 
 ## Setup
