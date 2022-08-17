@@ -8,7 +8,7 @@ The code here is not secure. It uses 'eval' for convenience purposes and could e
 ## Setup
 1) Clone this project:
 ```
-git clone *.git
+git clone https://github.com/0x1Avram/js-deobfuscator.git
 ```
 2) Install node.js (I used version 16.15)
 3) Install dependencies by running this command in the folder root:
