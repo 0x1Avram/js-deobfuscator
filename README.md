@@ -145,6 +145,11 @@ Examples:
   -i obfuscated.txt -o deobfuscated.txt
 ```
 
+## Notes
+From my testing, this seems to work fine with current versions of the obfuscator. 
+However, older versions of the obfuscator may output a different AST and that
+might complicate things. If you happen to stumble across an issue, open an issue
+and I'll look into it.
 
 ## License
 
