@@ -1,2 +1,2 @@
-stringarray auto detection: It does not work since it cannot detect the wrappers properly.
+stringarray auto detection: node index.js -i case_04_input_v2.txt -o case_04_output.txt
 With stringarray input: node index.js -i case_04_input.txt -o case_04_output.txt -s case_04_stringarray.txt -w case_04_stringarraywrappers.txt -n a0b -r case_04_stringarrayrotate.txt
