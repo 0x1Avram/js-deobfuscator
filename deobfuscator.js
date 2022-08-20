@@ -173,6 +173,7 @@ class FinalizingEscapeSequenceTransformer extends stageDeobfuscator.TransformerD
     }
 
     _createNewUnescapedStringNode(oldNode){
+        this.logger.debug(`[EVAL][EscapedString] ${oldNode.value}`);
         const newNode = {
             type: 'Literal', 
             value: usefulModule.StringOperations.unescapeStrWithDoubleEscapedChars(oldNode.value),

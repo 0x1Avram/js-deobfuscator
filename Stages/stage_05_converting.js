@@ -533,6 +533,8 @@ class ConvertingNumberToNumericalExpressionTransformer extends stageDeobfuscator
     }
 
     _createNewLiteralNode(binaryExpression){
+        this.logger.debug(`[EVAL][BinaryExpression] ${astOperations.ASTSourceCodeOperations.
+            generateSourceCodeFromAST(binaryExpression)}`);
         const newLiteralValue = astOperations.NodeEvaller.evalNodeFromASTRepresentation(binaryExpression);
 
         if(typeof newLiteralValue == 'string'){

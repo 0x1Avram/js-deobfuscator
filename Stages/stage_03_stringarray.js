@@ -391,14 +391,11 @@ class StringArrayWrapperTemplateNodesFinder extends NodeFinder{
             return false;
         }
 
-
-
         const assignmentExpressions = esquery(node, `FunctionExpression[params.length=2] > BlockStatement >` + 
         `ExpressionStatement > AssignmentExpression[left.type='Identifier'][right.type='BinaryExpression']`);
         if(assignmentExpressions.length == 0){
             return false;
         }
-
 
         const callExpressionsAtTheEnd = esquery(node, `ReturnStatement CallExpression[callee.type='Identifier']` + 
         `[callee.name=${wrapperFunctionName}][arguments.length=2]`);
@@ -724,12 +721,21 @@ class StringArrayNodesFinder{
     }
 
     _addCommandLineStringArrayCodeToExecutionContext(){
+        this.logger.info(`[CommandLineInput] Addding found stringarray template to execution context.`);
+        this.logger.debug(`[EVAL][CommandLineInput][StringArray] ${
+            this.argv.stringArrayCmdLineSpecificNodesInfo.stringArrayTemplateCode}`);
         eval.call(module, this.argv.stringArrayCmdLineSpecificNodesInfo.stringArrayTemplateCode);
     
         this._fixStringArrayWrappersCommandLineCode();
+        this.logger.info(`[CommandLineInput] Addding found stringarray calls wrappers templates to execution context.`);
+        this.logger.debug(`[EVAL][CommandLineInput][StringArrayWrappers] ${
+            this.argv.stringArrayCmdLineSpecificNodesInfo.stringArrayWrapperTemplates}`);
         eval.call(module, this.argv.stringArrayCmdLineSpecificNodesInfo.stringArrayWrapperTemplates);
 
         if(this.argv.stringArrayCmdLineSpecificNodesInfo.stringArrayRotate){
+            this.logger.info(`[CommandLineInput] Addding found stringarray rotate template to execution context.`);
+            this.logger.debug(`[EVAL][CommandLineInput][StringArrayRotate] ${
+                this.argv.stringArrayCmdLineSpecificNodesInfo.stringArrayRotate}`);
             eval.call(module, this.argv.stringArrayCmdLineSpecificNodesInfo.stringArrayRotate);
         }
     }
@@ -747,6 +753,7 @@ class StringArrayNodesFinder{
     }
 
     _addStringArrayTemplateToExecutionContext(){
+        this.logger.info(`Addding found stringarray template to execution context.`);
         let correspondingCode = this.obfuscatedSourceCode.substring(this.nodeWithStringArrayTemplate.range[0], 
             this.nodeWithStringArrayTemplate.range[1]);
         let codeToAdd = correspondingCode.replace(/^\s*function\s+[^(]+\(/, 'function (');
@@ -756,16 +763,19 @@ class StringArrayNodesFinder{
         if(codeToAdd.startsWith('const ')){
             codeToAdd = `var ${codeToAdd.substring(6)}`;
         }
+        this.logger.debug(`[EVAL][NodesFinder][StringArray] ${codeToAdd}`);
         eval.call(module, codeToAdd);
     }
     
     _addStringArrayCallWrappersToExecutionContext(){
+        this.logger.info(`Addding found stringarray calls wrappers templates to execution context.`);
         for(let i = 0 ; i < this.nodesWithStringArrayCallWrapperTemplate.length; i++){
             const wrapper = this.nodesWithStringArrayCallWrapperTemplate[i];
             const wrapperName = this.stringArrayCallWrapperTemplateFunctionNames[i];
             let correspondingCode = this.obfuscatedSourceCode.substring(wrapper.range[0], wrapper.range[1]);
             let codeToAdd = correspondingCode.replace(/^\s*function\s+[^(]+\(/, 'function (');
             codeToAdd = `var ${wrapperName} = ${codeToAdd}`;
+            this.logger.debug(`[EVAL][NodesFinder][StringArrayWrappers] ${codeToAdd}`);
             eval.call(module, codeToAdd);
         }
     }
@@ -774,11 +784,13 @@ class StringArrayNodesFinder{
         if(!this.nodeWithStringArrayRotateFunction){
             return;
         }
+        this.logger.info(`Addding found stringarray rotate template to execution context.`);
         let codeStringArrayRotateFunction = this.obfuscatedSourceCode.substring(
             this.nodeWithStringArrayRotateFunction.range[0], this.nodeWithStringArrayRotateFunction.range[1]);
         if(codeStringArrayRotateFunction[0] != '('){
             codeStringArrayRotateFunction = `(${codeStringArrayRotateFunction});`;    
         }
+        this.logger.debug(`[EVAL][NodesFinder][StringArrayRotate] ${codeStringArrayRotateFunction}`);
         eval.call(module, codeStringArrayRotateFunction);
     }
 
@@ -938,6 +950,7 @@ class StringArrayCallsReplacer{
             const variableDeclarator = variableDeclaratorsWithHostNodes[i];
             let codeToEval = `var ` + `${this.obfuscatedSourceCode.substring(variableDeclarator.range[0], 
                 variableDeclarator.range[1])}`;
+                this.logger.debug(`[EVAL][Wrappers][HostNode] ${codeToEval}`);
             eval.call(module, codeToEval);
         }
     }
@@ -1040,6 +1053,7 @@ class StringArrayCallsReplacer{
         for(let i = 0; i < wrappers.length; i++){
             const wrapper = wrappers[i];
             let wrapperCode = `var ${this.obfuscatedSourceCode.substring(wrapper.range[0], wrapper.range[1])}`;
+            this.logger.debug(`[EVAL][VariableWrapper] ${wrapperCode}`);
             eval.call(module, wrapperCode);
         }
     }
@@ -1048,6 +1062,8 @@ class StringArrayCallsReplacer{
         let nodesWithCallsToReplace = this._getVariableWrapperCallsInScope(node, currentNodeVariableWrappers);
         for(let i = 0; i < nodesWithCallsToReplace.length; i++){
             const callExpressionNode = nodesWithCallsToReplace[i];
+            this.logger.debug(`[EVAL][VariableWrapperReplace] ${this.obfuscatedSourceCode.substring(
+                callExpressionNode.range[0], callExpressionNode.range[1])}`);
             const stringToReplaceWith = astOperations.NodeEvaller.evalCallExpressionNodeBasedOnSourceCode(
                 callExpressionNode, this.obfuscatedSourceCode);
             astOperations.ASTModifier.replaceNode(callExpressionNode, {
@@ -1267,6 +1283,7 @@ class StringArrayCallsReplacer{
         for(let i = 0; i < wrappers.length; i++){
             const wrapper = wrappers[i];
             let wrapperCode = this.obfuscatedSourceCode.substring(wrapper.range[0], wrapper.range[1]);
+            this.logger.debug(`[EVAL][FunctionWrapper] ${wrapperCode}`);
             eval.call(module, wrapperCode);
         }
     }
@@ -1275,6 +1292,8 @@ class StringArrayCallsReplacer{
         let nodesWithCallsToReplace = this._getFunctionWrapperCallsInScope(nodeWithBody, currentNodeFunctionWrappers);
         for(let i = 0; i < nodesWithCallsToReplace.length; i++){
             const callExpressionNode = nodesWithCallsToReplace[i];
+            this.logger.debug(`[EVAL][FunctionWrapperReplace] ${this.obfuscatedSourceCode.substring(
+                callExpressionNode.range[0], callExpressionNode.range[1])}`);
             const stringToReplaceWith = astOperations.NodeEvaller.evalCallExpressionNodeBasedOnSourceCode(
                 callExpressionNode, this.obfuscatedSourceCode);
             astOperations.ASTModifier.replaceNode(callExpressionNode, {
