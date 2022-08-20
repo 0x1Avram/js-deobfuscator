@@ -539,7 +539,9 @@ class ControlFlowFlatteningBlockStatementControlFlowTransformer extends stageDeo
         }
 
         const controlFlowOrder = this._getControlFlowOrder(memberExpressionNode);
-        const numericallySortedCFOrder = [...controlFlowOrder].sort();
+        const numericallySortedCFOrder = controlFlowOrder.sort(function(a, b) {
+            return a - b;
+          });
         for(let i = 0; i < numericallySortedCFOrder.length; i++){
             if(numericallySortedCFOrder[i] != i){
                 return false;
