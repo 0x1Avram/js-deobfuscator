@@ -1109,16 +1109,31 @@ class StringArrayCallsReplacer{
                 continue;
             }
         
-            const initIdentifier = variableDeclarator.init;
-            if(initIdentifier.type != 'Identifier'){
+            const initNode = variableDeclarator.init;
+            if((initNode.type != 'Identifier') && (initNode.type != 'FunctionExpression')){
                 continue;
             }
         
             let allVariableWrapperNames = this._getIdentifierNamesForVariableDeclaratorNodes(this.allVariableWrappers);
-            
-            if(allVariableWrapperNames.includes(initIdentifier.name)){
-                variableDeclaratorWrappers.push(variableDeclarator);
+
+            if(initNode.type == 'Identifier'){
+                if(allVariableWrapperNames.includes(initNode.name)){
+                    variableDeclaratorWrappers.push(variableDeclarator);
+                }
             }
+            else if(initNode.type == 'FunctionExpression'){
+                const callExpressionNodes = esquery(initNode, `FunctionExpression[params.length>0] > BlockStatement > `
+                + `ReturnStatement > CallExpression[callee.type='Identifier']`);
+                for(let j = 0; j < callExpressionNodes.length; j++){
+                    const callExpression = callExpressionNodes[j];
+                    const identifier = callExpression.callee;
+                    if(allVariableWrapperNames.includes(identifier.name)){
+                        variableDeclaratorWrappers.push(variableDeclarator);
+                        break;
+                    }
+                }
+            }
+            
         }
         return variableDeclaratorWrappers;
     }
