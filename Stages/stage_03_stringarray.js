@@ -328,6 +328,10 @@ class StringArrayWrapperTemplateNodesFinder extends NodeFinder{
                 this.wrapperNodes.push(arrayWrapper);
             }
         });
+
+        if(this.wrapperNodes.length == 0){
+            this._findArrayWrapperTemplatesForOlderObfuscatorVersions();
+        }
     }
 
     _findPossibleArrayWrapperNodes(){
@@ -483,12 +487,30 @@ class StringArrayWrapperTemplateNodesFinder extends NodeFinder{
         return true;
     }
 
+    _findArrayWrapperTemplatesForOlderObfuscatorVersions(){
+        const memberExpressions = esquery(this.ast, `Program > VariableDeclaration[declarations.length=1] > `
+        + `VariableDeclarator[id.type='Identifier'][init.type='FunctionExpression'] > FunctionExpression`
+        + `[params.length>0] > BlockStatement > VariableDeclaration > VariableDeclarator > MemberExpression`
+        + `[object.type='Identifier'][object.name='${this.stringArrayTemplateIdentifierName}']`);
+        for(let i = 0; i < memberExpressions.length; i++){
+            const memberExpression = memberExpressions[i];
+            const functionExpression = astOperations.ASTRelations.getParentNodeOfType(memberExpression, 'FunctionExpression');
+            const variableDeclaration = astOperations.ASTRelations.getParentNodeOfType(functionExpression, 'VariableDeclaration');
+            this.wrapperNodes.push(variableDeclaration);
+        }
+    }
+
     _findIdentifierNames(){
         this.wrapperNames = [];
 
         for(let i = 0; i < this.wrapperNodes.length; i++){
             const wrapper = this.wrapperNodes[i];
-            this.wrapperNames.push(wrapper.id.name);
+            if(wrapper.type == 'FunctionDeclaration'){
+                this.wrapperNames.push(wrapper.id.name);
+            }
+            else if(wrapper.type == 'VariableDeclaration'){
+                this.wrapperNames.push(wrapper.declarations[0].id.name);
+            }
         }
     }
 
@@ -525,6 +547,10 @@ class StringArrayRotateTemplateNodeFinder extends NodeFinder{
         if(nrSuitableNodes > 1){
             this.logger.warn(`Found more than one string array rotate nodes.`);
             this.stringArrayRotateNode = null;
+        }
+
+        if(nrSuitableNodes == 0){
+            this._findArrayRotateTemplateForOlderObfuscatorVersions();
         }
     }
 
@@ -630,6 +656,66 @@ class StringArrayRotateTemplateNodeFinder extends NodeFinder{
         }
     }
 
+    _findArrayRotateTemplateForOlderObfuscatorVersions(){
+        const functionExpressions = esquery(this.ast, `Program > ExpressionStatement > CallExpression[arguments.length=2] `
+        + `> FunctionExpression[id=null]`);
+
+        let nrSuitableNodes = 0;
+        for(let i = 0; i < functionExpressions.length; i++){
+            const functionExpression = functionExpressions[i];
+            const callExpression = functionExpression.parent;
+            const expressionStatement = callExpression.parent;
+            const firstArgument = callExpression.arguments[0];
+            if(firstArgument.type != 'Identifier'){
+                continue;
+            }
+            if(firstArgument.name != this.stringArrayTemplateIdentifierName){
+                continue;
+            }
+
+            let foundPush = false;
+            let foundShift = false;
+
+            const literalsPush = esquery(functionExpression, `Literal[value='push']`);
+            if(literalsPush.length != 0){
+                foundPush = true;
+            }
+            else{
+                const identifiersPush = esquery(functionExpression, `Identifier[name='push']`);
+                if(identifiersPush.length != 0){
+                    foundPush = true;
+                }
+            }
+
+            const literalsShift = esquery(functionExpression, `Literal[value='shift']`);
+            if(literalsShift.length != 0){
+                foundShift = true;
+            }
+            else{
+                const identifiersShift = esquery(functionExpression, `Identifier[name='shift']`);
+                if(identifiersShift.length != 0){
+                    foundShift = true;
+                }
+            }
+
+            if(!foundPush || !foundShift){
+                continue;
+            }
+
+            this.stringArrayRotateNode = expressionStatement;
+            nrSuitableNodes++;
+        }
+
+        if(nrSuitableNodes > 1){
+            this.logger.warn(`Found more than one string array rotate nodes (old version).`);
+            this.stringArrayRotateNode = null;
+        }
+        
+        if(nrSuitableNodes == 0){
+            this.logger.warn(`Could not find string array rotate node (old version).`);
+        }
+    }
+
     getNode(){
         return this.stringArrayRotateNode;
     }
@@ -718,6 +804,7 @@ class StringArrayNodesFinder{
         else{
             this._addFoundInASTStringArrayNodesToExecutionContext();
         }
+        this.logger.info(`Finished adding stringarray specific nodes.`);
     }
 
     _addCommandLineStringArrayCodeToExecutionContext(){
@@ -757,11 +844,14 @@ class StringArrayNodesFinder{
         let correspondingCode = this.obfuscatedSourceCode.substring(this.nodeWithStringArrayTemplate.range[0], 
             this.nodeWithStringArrayTemplate.range[1]);
         let codeToAdd = correspondingCode.replace(/^\s*function\s+[^(]+\(/, 'function (');
-        if(!codeToAdd.startsWith('var ')){
-            codeToAdd = `var ${this.stringArrayTemplateFunctionName} = ${codeToAdd}`;
-        }
         if(codeToAdd.startsWith('const ')){
             codeToAdd = `var ${codeToAdd.substring(6)}`;
+        }
+        else if(codeToAdd.startsWith('let ')){
+            codeToAdd = `var ${codeToAdd.substring(4)}`;
+        }
+        else if(!codeToAdd.startsWith('var ')){
+            codeToAdd = `var ${this.stringArrayTemplateFunctionName} = ${codeToAdd}`;
         }
         this.logger.debug(`[EVAL][NodesFinder][StringArray] ${codeToAdd}`);
         eval.call(module, codeToAdd);
@@ -773,8 +863,20 @@ class StringArrayNodesFinder{
             const wrapper = this.nodesWithStringArrayCallWrapperTemplate[i];
             const wrapperName = this.stringArrayCallWrapperTemplateFunctionNames[i];
             let correspondingCode = this.obfuscatedSourceCode.substring(wrapper.range[0], wrapper.range[1]);
-            let codeToAdd = correspondingCode.replace(/^\s*function\s+[^(]+\(/, 'function (');
-            codeToAdd = `var ${wrapperName} = ${codeToAdd}`;
+            let codeToAdd = null;
+            if(correspondingCode.startsWith('var ')){
+                ;
+            }
+            else if(correspondingCode.startsWith('const ')){
+                codeToAdd = `var ${correspondingCode.substring(6)}`;
+            }
+            else if(correspondingCode.startsWith('let ')){
+                codeToAdd = `var ${correspondingCode.substring(4)}`;
+            }
+            else{
+                codeToAdd = correspondingCode.replace(/^\s*function\s+[^(]+\(/, 'function (');
+                codeToAdd = `var ${wrapperName} = ${codeToAdd}`;
+            }
             this.logger.debug(`[EVAL][NodesFinder][StringArrayWrappers] ${codeToAdd}`);
             eval.call(module, codeToAdd);
         }
