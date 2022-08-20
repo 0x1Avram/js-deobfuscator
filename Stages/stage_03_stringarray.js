@@ -496,7 +496,9 @@ class StringArrayWrapperTemplateNodesFinder extends NodeFinder{
             const memberExpression = memberExpressions[i];
             const functionExpression = astOperations.ASTRelations.getParentNodeOfType(memberExpression, 'FunctionExpression');
             const variableDeclaration = astOperations.ASTRelations.getParentNodeOfType(functionExpression, 'VariableDeclaration');
-            this.wrapperNodes.push(variableDeclaration);
+            if(!this.wrapperNodes.includes(variableDeclaration)){
+                this.wrapperNodes.push(variableDeclaration);
+            }
         }
     }
 
@@ -865,7 +867,7 @@ class StringArrayNodesFinder{
             let correspondingCode = this.obfuscatedSourceCode.substring(wrapper.range[0], wrapper.range[1]);
             let codeToAdd = null;
             if(correspondingCode.startsWith('var ')){
-                ;
+                codeToAdd = correspondingCode;
             }
             else if(correspondingCode.startsWith('const ')){
                 codeToAdd = `var ${correspondingCode.substring(6)}`;
