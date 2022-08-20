@@ -1,6 +1,6 @@
 {
   "name": "js-deobfuscator",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Deobfuscator for javascript samples obfuscated by obfuscator.io.",
   "keywords": [
     "deobfuscation",
