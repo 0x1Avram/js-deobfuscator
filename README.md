@@ -21,12 +21,8 @@ npm install
 
 ## Binaries
 I included binaries built for Windows/Linux in the release section (for the windows one, you will need to add the proper '.exe' extension in order to use it). Those binaries where built using pkg and can be run on a system standalone, without the need to install node.js or any other dependencies.
+Their respective SHA256 hashes can be found in the releasee section as well.
 
-Their respective SHA256 hashes are:
-```
-js-deobfuscator-linux - 50FDEAB594CD3DF6DB9DA62B6C893E49665438545D99F384802539C2BA0C89D3
-js-deobfuscator-win -   4A4EDAF482D51DE74035BC1A9DF312E9D8023DBFB96909EE63C1EC1A0A43C596
-```
 
 For those wanting to build this into an executable themselves, install [pkg](https://www.npmjs.com/package/pkg) and then run this command in the folder root
 ```
