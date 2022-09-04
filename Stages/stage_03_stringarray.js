@@ -935,10 +935,14 @@ class StringArrayCallsReplacer{
     replace(){
         this._initializeVariableAndFunctionWrappers();
         
+        var i = 0;
         var thisObj = this;
         estraverse.traverse(this.ast, {
             enter: function(node){
                 if(astOperations.NodeChecker.nodeHasBodyWithLexicalScope(node)){
+                    i++;
+                    console.log(`Replacing calls in scope nr. ${i}.`);
+                    thisObj.logger.info(`Replacing calls in scope nr. ${i}.`);
                     thisObj._fixStringArrayCallsInLexicalScope(node);
                 }
             },
@@ -1200,19 +1204,22 @@ class StringArrayCallsReplacer{
         let wrapperNamesSearchedInCurrentScope = this._getVariableWrapperNamesToSearchInCurrentScope(nodeWithBody, 
             curentNodeWrapperNames, allWrapperNames);
        
-
-        for(let i = 0; i < wrapperNamesSearchedInCurrentScope.length; i++){
-            const identifierNodesFromCalls = esquery(nodeWithBody, `CallExpression[callee.type='Identifier'] > `
-            + `Identifier[name='${wrapperNamesSearchedInCurrentScope[i]}']`);
-            identifierNodesFromCalls.forEach((identifierNode) => {
-                const lexicalScope = astOperations.ASTRelations.getParentNodeWithLexicalScope(identifierNode);
-                if(nodeWithBody == lexicalScope){
-                    const callExpression = identifierNode.parent;
-                    wrapperCalls.push(callExpression);
+        var firstNode = true;
+        estraverse.traverse(nodeWithBody, {
+            enter: function(node, parent){
+                if(!firstNode && astOperations.NodeChecker.nodeHasBodyWithLexicalScope(node)){
+                    this.skip();
                 }
-            });        
-        }
+                firstNode = false;
 
+                if((node.type == 'Identifier') && (parent.type == 'CallExpression')){
+                    let identifierName = node.name;
+                    if(wrapperNamesSearchedInCurrentScope.includes(identifierName)){
+                        wrapperCalls.push(parent);
+                    }
+                }
+            },
+        });
         return wrapperCalls;
     }
 
@@ -1246,36 +1253,61 @@ class StringArrayCallsReplacer{
     }
 
     _wrapperIsRedefinedInCurrentScopeAsNewVariable(wrapperName, nodeWithBody){
-        const allVariableDeclarators = esquery(nodeWithBody, `VariableDeclarator[id.type='Identifier'][id.name='${wrapperName}']`);
-        for(let i = 0; i < allVariableDeclarators.length; i++){
-            const lexicalScope = astOperations.ASTRelations.getParentNodeWithLexicalScope(allVariableDeclarators[i]);
-            if(lexicalScope == nodeWithBody){
-                return true;
-            }
-        }
-        return false;
+        var firstNode = true;
+        var foundRedefined = false;
+        estraverse.traverse(nodeWithBody, {
+            enter: function(node, parent){
+                if(!firstNode && astOperations.NodeChecker.nodeHasBodyWithLexicalScope(node)){
+                    this.skip();
+                }
+                firstNode = false;
+
+                if((node.type == 'Identifier') && (node.name == wrapperName) && (parent.type == 'VariableDeclarator')){
+                    foundRedefined = true;
+                    this.break();
+                }
+            },
+        });
+        return foundRedefined;
     }
 
     _wrapperIsRedefinedInCurrentScopeAsNewFunction(wrapperName, nodeWithBody){
-        const allFunctionDeclarations = esquery(nodeWithBody, `FunctionDeclaration[id.type='Identifier'][id.name='${wrapperName}']`);
-        for(let i = 0; i < allFunctionDeclarations.length; i++){
-            const lexicalScope = astOperations.ASTRelations.getParentNodeWithLexicalScope(allFunctionDeclarations[i]);
-            if(lexicalScope == nodeWithBody){
-                return true;
-            }
-        }
-        return false;
+        var firstNode = true;
+        var foundRedefined = false;
+        estraverse.traverse(nodeWithBody, {
+            enter: function(node, parent){
+                if(!firstNode && astOperations.NodeChecker.nodeHasBodyWithLexicalScope(node)){
+                    this.skip();
+                }
+                firstNode = false;
+
+                if((node.type == 'Identifier') && (node.name == wrapperName) && (parent.type == 'FunctionDeclaration')){
+                    foundRedefined = true;
+                    this.break();
+                }
+            },
+        });
+        return foundRedefined;
     }
 
     _wrapperIsRedefinedInCurrentScopeAsAssignmentExpression(wrapperName, nodeWithBody){
-        const allAssignmentExpressions = esquery(nodeWithBody, `AssignmentExpression[left.type='Identifier'][left.name='${wrapperName}']`);
-        for(let i = 0; i < allAssignmentExpressions.length; i++){
-            const lexicalScope = astOperations.ASTRelations.getParentNodeWithLexicalScope(allAssignmentExpressions[i]);
-            if(lexicalScope == nodeWithBody){
-                return true;
-            }
-        }
-        return false;
+        var firstNode = true;
+        var foundRedefined = false;
+        estraverse.traverse(nodeWithBody, {
+            enter: function(node, parent){
+                if(!firstNode && astOperations.NodeChecker.nodeHasBodyWithLexicalScope(node)){
+                    this.skip();
+                }
+                firstNode = false;
+
+                if((node.type == 'Identifier') && (node.name == wrapperName) 
+                && (parent.type == 'AssignmentExpression') && parent.left && (parent.left.name == wrapperName)){
+                    foundRedefined = true;
+                    this.break();
+                }
+            },
+        });
+        return foundRedefined;
     }
 
     _wrapperWasDefinedInAScopeThatIsParentOfCurrentScope(wrapper, nodeWithBody){
@@ -1430,17 +1462,22 @@ class StringArrayCallsReplacer{
         let wrapperNamesForSearching = this._getFunctionWrapperNamesToSearchInCurrentScope(nodeWithBody, 
             curentNodeWrapperNames, allWrapperNames);
 
-        for(let i = 0; i < wrapperNamesForSearching.length; i++){
-            const identifierNodesFromCalls = esquery(nodeWithBody, `CallExpression[callee.type='Identifier'] > `
-            + `Identifier[name='${wrapperNamesForSearching[i]}']`);
-            identifierNodesFromCalls.forEach((node) => {
-                const lexicalScope = astOperations.ASTRelations.getParentNodeWithLexicalScope(node);
-                if(nodeWithBody == lexicalScope){
-                    const callExpression = node.parent;
-                    wrapperCalls.push(callExpression);
+        var firstNode = true;
+        estraverse.traverse(nodeWithBody, {
+            enter: function(node, parent){
+                if(!firstNode && astOperations.NodeChecker.nodeHasBodyWithLexicalScope(node)){
+                    this.skip();
                 }
-            });        
-        }
+                firstNode = false;
+
+                if((node.type == 'Identifier') && (parent.type == 'CallExpression')){
+                    let identifierName = node.name;
+                    if(wrapperNamesForSearching.includes(identifierName)){
+                        wrapperCalls.push(parent);
+                    }
+                }
+            },
+        });
 
         return wrapperCalls;
     }
@@ -1505,9 +1542,11 @@ class StringArraySyntheticTransformer extends stageDeobfuscator.TransformerDeobf
     }
 
     _replaceStringArrayCallsWithCorrespondingString(){
+        this.logger.info('Replacing stringarray calls with actual strings - START.');
         this.stringArrayCallsReplacer = new StringArrayCallsReplacer(this.logger, this.obfuscatedSourceCode, 
             this.ast, this.stringArrayCallWrapperTemplateFunctionNames);
         this.stringArrayCallsReplacer.replace();
+        this.logger.info('Replacing stringarray calls with actual strings - FINISH.');
     }
 
 }
