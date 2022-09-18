@@ -620,6 +620,9 @@ class ControlFlowFlatteningBlockStatementControlFlowTransformer extends stageDeo
             'VariableDeclaration');
 
         let whileTrueBreakStatementNode = this._getWhileTrueNode(controllerNodeMemberExpression);
+        if(whileTrueBreakStatementNode == null){
+            return;
+        }
         let indexerNode = this._getIndexerNode(whileTrueBreakStatementNode);
 
         let whileStatementNode = astOperations.ASTRelations.getParentNodeOfType(whileTrueBreakStatementNode, 'WhileStatement');

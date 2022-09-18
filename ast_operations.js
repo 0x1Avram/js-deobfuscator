@@ -231,7 +231,7 @@ class ASTRelations{
 
     static getProgramOrBlockScopeParent(node){
         while(node){
-            if((node.type == 'Program') || (node.type == 'BlockStatement')){
+            if((node.type == 'Program') || (node.type == 'BlockStatement') || (node.type == 'SwitchCase')){
                 return node;
             }
 
@@ -342,7 +342,7 @@ class ASTModifier{
 
     static insertNodesAfter(nodeToInsertAfter, nodesToInsert, logger=null, sourceCode=null){
         const parentProgramOrBlockStatement = ASTRelations.getProgramOrBlockScopeParent(nodeToInsertAfter);
-        ASTModifier._insertNodesAfterInSameBlockScope(parentProgramOrBlockStatement, nodeToInsertAfter, nodesToInsert);
+        ASTModifier._insertNodesAfterInSameBlockScope(parentProgramOrBlockStatement, nodeToInsertAfter, nodesToInsert, logger);
         ASTModifier.logDebugNode('[Insert nodes after][ExistingNode]', nodeToInsertAfter, logger, sourceCode);
         
         const parent = nodeToInsertAfter.parent;
@@ -354,11 +354,18 @@ class ASTModifier{
         }
     }
     
-    static _insertNodesAfterInSameBlockScope(blockStatementOrProgramNode, nodeToInsertAfter, nodesToInsert){
-        let statements = blockStatementOrProgramNode.body;
+    static _insertNodesAfterInSameBlockScope(blockStatementOrProgramNode, nodeToInsertAfter, nodesToInsert, logger=null){
+        var statements = null;
+        if(blockStatementOrProgramNode.type == 'SwitchCase'){
+            statements = blockStatementOrProgramNode.consequent;
+        }
+        else{
+            statements = blockStatementOrProgramNode.body;
+        }
         
         const positionToInsertAt = statements.indexOf(nodeToInsertAfter) + 1;
         if(positionToInsertAt == 0){
+            logger.warn('Could not find node after which to insert new nodes.');
             return;
         }
     
@@ -366,13 +373,19 @@ class ASTModifier{
             ...nodesToInsert,
             ...statements.slice(positionToInsertAt)
         ];
-        blockStatementOrProgramNode.body = newStatements;
+        
+        if(blockStatementOrProgramNode.type == 'SwitchCase'){
+            blockStatementOrProgramNode.consequent = newStatements;
+        }
+        else{
+            blockStatementOrProgramNode.body = newStatements;
+        }
     }
 
     static insertNodesBefore(nodeToInsertBefore, nodesToInsert, logger=null, sourceCode=null){
         const parentProgramOrBlockStatement = ASTRelations.getProgramOrBlockScopeParent(nodeToInsertBefore);
         ASTModifier._insertNodesBeforeInSameBlockScope(parentProgramOrBlockStatement, 
-            nodeToInsertBefore, nodesToInsert);
+            nodeToInsertBefore, nodesToInsert, logger);
         ASTModifier.logDebugNode('[Insert nodes before][ExistingNode]', nodeToInsertBefore, logger, sourceCode);
 
         const parent = nodeToInsertBefore.parent;
@@ -384,11 +397,18 @@ class ASTModifier{
         }
     }
 
-    static _insertNodesBeforeInSameBlockScope(blockStatementOrProgramNode, nodeToInsertAfter, nodesToInsert){
-        let statements = blockStatementOrProgramNode.body;
+    static _insertNodesBeforeInSameBlockScope(blockStatementOrProgramNode, nodeToInsertAfter, nodesToInsert, logger=null){
+        var statements = null;
+        if(blockStatementOrProgramNode.type == 'SwitchCase'){
+            statements = blockStatementOrProgramNode.consequent;
+        }
+        else{
+            statements = blockStatementOrProgramNode.body;
+        }
 
         const positionToInsertAt = statements.indexOf(nodeToInsertAfter);
         if(positionToInsertAt == -1){
+            logger.warn('Could not find node before which to insert new nodes.');
             return;
         }
 
@@ -396,7 +416,13 @@ class ASTModifier{
             ...nodesToInsert,
             ...statements.slice(positionToInsertAt)
         ];
-        blockStatementOrProgramNode.body = newStatements;
+
+        if(blockStatementOrProgramNode.type == 'SwitchCase'){
+            blockStatementOrProgramNode.consequent = newStatements;
+        }
+        else{
+            blockStatementOrProgramNode.body = newStatements;
+        }
     }
 }
 

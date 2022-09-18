@@ -145,12 +145,23 @@ class SelfDefendingRemover{
     }
 
     deobfuscate(){
-        const literalNodes = esquery(this.ast, `VariableDeclaration[declarations.length=1] > VariableDeclarator > `
+        var literalNodes = esquery(this.ast, `VariableDeclaration[declarations.length=1] > VariableDeclarator > `
         + `CallExpression ThisExpression ~ FunctionExpression > BlockStatement > ReturnStatement `
         + `MemberExpression[property.name='search'] Literal[value='(((.+)+)+)+$']`);
+
+        var method2SelfDefending = false;
+        if(literalNodes.length == 0){
+            literalNodes = esquery(this.ast, `VariableDeclaration[declarations.length=1] > VariableDeclarator > `
+            + `CallExpression ThisExpression ~ FunctionExpression > BlockStatement Literal[value='^([^ ]+( +[^ ]+)+)+[^ ]}']`);
+            method2SelfDefending = true;
+        }
+
         for(let i = 0; i < literalNodes.length; i++){
             const literalNode = literalNodes[i];
-            const functionExpressionParent = astOperations.ASTRelations.getParentNodeOfType(literalNode, 'FunctionExpression');
+            let functionExpressionParent = astOperations.ASTRelations.getParentNodeOfType(literalNode, 'FunctionExpression');
+            if(method2SelfDefending){
+                functionExpressionParent = astOperations.ASTRelations.getParentNodeOfType(functionExpressionParent.parent, 'FunctionExpression');
+            }
             const variableDeclaration = astOperations.ASTRelations.getParentNodeOfType(functionExpressionParent, 'VariableDeclaration');
             this.logger.info(`Found 'selfDefending' related nodes and removing them.`);
             if(this._removeCalls(variableDeclaration)){
