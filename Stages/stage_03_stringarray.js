@@ -1130,6 +1130,10 @@ class StringArrayCallsReplacer{
                 + `ReturnStatement > CallExpression[callee.type='Identifier']`);
                 for(let j = 0; j < callExpressionNodes.length; j++){
                     const callExpression = callExpressionNodes[j];
+                    const functionExpressionNode = astOperations.ASTRelations.getParentNodeOfType(callExpression, 'FunctionExpression');
+                    if(functionExpressionNode != initNode){
+                        continue;
+                    }
                     const identifier = callExpression.callee;
                     if(allVariableWrapperNames.includes(identifier.name)){
                         variableDeclaratorWrappers.push(variableDeclarator);
@@ -1214,7 +1218,8 @@ class StringArrayCallsReplacer{
 
                 if((node.type == 'Identifier') && (parent.type == 'CallExpression')){
                     let identifierName = node.name;
-                    if(wrapperNamesSearchedInCurrentScope.includes(identifierName)){
+                    if(wrapperNamesSearchedInCurrentScope.includes(identifierName) 
+                      && (parent.callee.name == identifierName)){
                         wrapperCalls.push(parent);
                     }
                 }
@@ -1472,7 +1477,8 @@ class StringArrayCallsReplacer{
 
                 if((node.type == 'Identifier') && (parent.type == 'CallExpression')){
                     let identifierName = node.name;
-                    if(wrapperNamesForSearching.includes(identifierName)){
+                    if(wrapperNamesForSearching.includes(identifierName)
+                       && (parent.callee.name == identifierName)){
                         wrapperCalls.push(parent);
                     }
                 }
