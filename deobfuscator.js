@@ -27,7 +27,16 @@ class SourceCodeDeobfuscator{
     }
 
     deobfuscate(){
-        this._generateASTFromObfuscatedSourceCode();
+        try{
+            this._generateASTFromObfuscatedSourceCode();
+        }
+        catch(e){
+            this.logger.error(`[deobfuscator.js] Error when transforming the input source code to AST.`
+                              + ` This is an 'esprima' parser limitation and the code needs to be`
+                              + ` transpiled to an esprima compatible version before passing it to`
+                              + ` the deobfuscator. error = ${e}. Stack = ${e.stack}`);
+            return '';
+        }
         this._deobfuscateAST();
         this._generateSourceCodeFromDeobfuscatedAST();
         return this.deobfuscatedSourceCode;

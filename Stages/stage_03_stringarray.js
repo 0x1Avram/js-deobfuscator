@@ -1267,7 +1267,8 @@ class StringArrayCallsReplacer{
                 }
                 firstNode = false;
 
-                if((node.type == 'Identifier') && (node.name == wrapperName) && (parent.type == 'VariableDeclarator')){
+                if((node.type == 'Identifier') && (node.name == wrapperName) 
+                   && (parent.type == 'VariableDeclarator') && (parent.id.name == wrapperName)){
                     foundRedefined = true;
                     this.break();
                 }
@@ -1328,7 +1329,12 @@ class StringArrayCallsReplacer{
             node = parent;
         }while(parent.type != 'Program');
 
-        return false;
+        if(parent == wrapperLexicalScope){
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 
     _removeVariableDeclaratorWrappers(wrappers){
