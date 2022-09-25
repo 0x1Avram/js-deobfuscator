@@ -144,6 +144,7 @@ Examples:
 ## Notes
 From my testing, this seems to work fine with current versions of the obfuscator. 
 However, older versions of the obfuscator may output a different AST and that might complicate things. If you happen to stumble across a case where this should work but it doesn't, open an issue and I'll look into it.
+
 There are some scenarios where the deobfuscator might crash because an AST cannot be generated from the input. This is a limitation from the esprima parser used by the deobfuscator which does not support all new JavaScript features. If this error is encountered, a message suggesting that the code needs to be transpiled before deobfuscation will be displayed. The transpilation to an older JavaScript version for which esprima correctly parses the script can be done using [Babel](https://babeljs.io/) and the parsing of the script can be checked with tools such as [astexplorer](https://astexplorer.net/).
 
 ## License
