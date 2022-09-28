@@ -365,7 +365,12 @@ class ASTModifier{
         
         const positionToInsertAt = statements.indexOf(nodeToInsertAfter) + 1;
         if(positionToInsertAt == 0){
-            logger.warn('Could not find node after which to insert new nodes.');
+            logger.warn(`Could not find node after which to insert new nodes. `
+            + `Node = ${ASTSourceCodeOperations.generateSourceCodeFromAST(nodeToInsertAfter)}`);
+            logger.warn('Nodes that should have been inserted:');
+            for(let i = 0; i < nodesToInsert.length; i++){
+                logger.warn(`Node ${i+1}: ${ASTSourceCodeOperations.generateSourceCodeFromAST(nodesToInsert[i])}`);
+            }
             return;
         }
     
@@ -397,7 +402,7 @@ class ASTModifier{
         }
     }
 
-    static _insertNodesBeforeInSameBlockScope(blockStatementOrProgramNode, nodeToInsertAfter, nodesToInsert, logger=null){
+    static _insertNodesBeforeInSameBlockScope(blockStatementOrProgramNode, nodeToInsertBefore, nodesToInsert, logger=null){
         var statements = null;
         if(blockStatementOrProgramNode.type == 'SwitchCase'){
             statements = blockStatementOrProgramNode.consequent;
@@ -406,9 +411,15 @@ class ASTModifier{
             statements = blockStatementOrProgramNode.body;
         }
 
-        const positionToInsertAt = statements.indexOf(nodeToInsertAfter);
+        const positionToInsertAt = statements.indexOf(nodeToInsertBefore);
         if(positionToInsertAt == -1){
-            logger.warn('Could not find node before which to insert new nodes.');
+            logger.warn(`Could not find node before which to insert new nodes.`
+            + `Node = ${ASTSourceCodeOperations.generateSourceCodeFromAST(nodeToInsertBefore)}`);
+            logger.warn('Nodes that should have been inserted:');
+            for(let i = 0; i < nodesToInsert.length; i++){
+                logger.warn(`Node ${i+1}: ${ASTSourceCodeOperations.generateSourceCodeFromAST(nodesToInsert[i])}`);
+            }
+
             return;
         }
 
