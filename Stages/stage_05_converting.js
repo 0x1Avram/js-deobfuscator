@@ -543,6 +543,9 @@ class ConvertingNumberToNumericalExpressionTransformer extends stageDeobfuscator
                 value: newLiteralValue
             };
         }
+        else if(isNaN(newLiteralValue)){
+            return astOperations.NodeCreator.createNodeLiteralNumber(0);
+        }
         else{
             // number node
             return astOperations.NodeCreator.createNodeLiteralNumber(newLiteralValue);
