@@ -233,7 +233,7 @@ function main(){
         cleanupLogFiles(logger);
     }
 
-    logger.info('[index.js] Starting deobfuscation process.');
+    logger.info(`[index.js] Starting deobfuscation process for file ${argv.inputPath}.`);
 
     const obfuscatedSourceCode = readTextFile(argv.inputPath);
     logger.debug(`[index.js] Obfuscated source code: \n${obfuscatedSourceCode}`);

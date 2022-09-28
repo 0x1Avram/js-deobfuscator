@@ -344,7 +344,7 @@ class SimplifyingExpressionStatementsMergeTransformer extends stageDeobfuscator.
         for(let i = 0; i < astNodes.length; i++){
             estraverse.traverse(astNodes[i], {
                 enter: function(node){
-                    if(node.type == 'ExpressionStatement'){
+                    if((node.type == 'ExpressionStatement') && node.parent && (node.parent.type != 'ForStatement')){
                         thisObj._expandMergedExpressionStatements(node);
                     }
                 },
@@ -424,7 +424,7 @@ class SimplifyingVariableDeclarationsMergeTransformer extends stageDeobfuscator.
         for(let i = 0; i < astNodes.length; i++){
             estraverse.traverse(astNodes[i], {
                 enter: function(node){
-                    if(node.type == 'VariableDeclaration'){
+                    if((node.type == 'VariableDeclaration') && node.parent && (node.parent.type != 'ForStatement')){
                         thisObj._expandMergedVariableDeclarationNode(node);
                     }
                 },

@@ -745,7 +745,7 @@ class StringArrayNodesFinder{
         this._findNodesWithStringArrayCallWrapperTemplate();
 
         if(!this.foundStringArraySpecificNodes()){
-            this.logger.warn(`Cound not find string array and wrappers.`);
+            this.logger.warn(`Could not find string array and wrappers.`);
             return;
         }
 
