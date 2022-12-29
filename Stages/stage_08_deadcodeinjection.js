@@ -23,6 +23,7 @@ class StageDeadCodeInjection extends stageDeobfuscator.StageDeobfuscator{
 class DeadCodeInjectionDeadCodeInjectionTransformer extends stageDeobfuscator.TransformerDeobfuscator{
     constructor(logger, obfuscatedSourceCode, ast, argv){
         super(logger, obfuscatedSourceCode, ast, argv);
+        this.nrBlockStatements = 0;
     }
 
     deobfuscate(){
@@ -38,9 +39,16 @@ class DeadCodeInjectionDeadCodeInjectionTransformer extends stageDeobfuscator.Tr
             astNodes = [astNodes];
         }
 
+        
+        const totalNr = astNodes.length;
         for(let i = 0; i < astNodes.length; i++){
             estraverse.traverse(astNodes[i], {
                 enter: function(node){
+                    thisObj.nrBlockStatements++;
+                    if(thisObj.nrBlockStatements % 1000 == 0){
+                        console.log(`[stage_08][DeadCodeInjectionDeadCodeInjectionTransformer] Deobfuscate nrBlockStatements = ${thisObj.nrBlockStatements}.`);
+                    }
+                    
                     if(node.type == 'BlockStatement'){
                         thisObj._deobfuscateBlockStatementWithDeadCodeInjected(node);
                     }
@@ -156,10 +164,20 @@ class DeadCodeInjectionDeadCodeInjectionTransformer extends stageDeobfuscator.Tr
     }
 
     _removeDeadCodeDanglingDictionaries(){
+        console.log(`[stage_08][DeadCodeInjectionDeadCodeInjectionTransformer] Dangling remove-START.`);
+
         let objectExpressionNodes = esquery(this.ast, `VariableDeclaration[declarations.length=1] > VariableDeclarator`
         + `[id.type='Identifier'] > ObjectExpression`);
 
+        const totalNrObjectExprNodes = objectExpressionNodes.length;
+        let nrObjExprNodes = 0;
         for(let i = 0; i < objectExpressionNodes.length; i++){
+            nrObjExprNodes++;
+            if((nrObjExprNodes == 1) && (nrObjExprNodes % 100 == 0)){
+                console.log(`[stage_08][DeadCodeInjectionDeadCodeInjectionTransformer] Dangling remove ` + 
+                            `nrObjExprNodes = ${nrObjExprNodes}/${totalNrObjectExprNodes}.`);
+            }
+
             const objectExpression = objectExpressionNodes[i];
             if(!objectExpression.properties){
                 continue;

@@ -228,6 +228,7 @@ class ASTDeobfuscator{
             const stageDeobfuscatorObject = this._instantiateStageObject(stageName);
             
             this.logger.info(`[deobfuscator.js] ${i + 1}/${nrStages}) Deobfuscating stage '${stageName}'.`);
+            console.log(`[deobfuscator.js] ${i + 1}/${nrStages}) Deobfuscating stage '${stageName}'.`);
             try{
                 this._callDeobfuscationForStageObject(stageDeobfuscatorObject, stageName);
             }

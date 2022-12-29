@@ -17,7 +17,7 @@ class NodeChecker{
             return true;
         }
     
-        if(NodeChecker._nodeIsFunctionRelated(node)
+        if(NodeChecker.nodeIsFunctionRelated(node)
         && node.body && (node.body.type == 'BlockStatement')){
             return true;
         }
@@ -25,7 +25,27 @@ class NodeChecker{
         return false;
     }
 
-    static _nodeIsFunctionRelated(node){
+    static nodeHasBodyWithLexicalScopeStringArrayCallsReplace(node){
+        if(!node){
+            return false;
+        }
+
+        if(NodeChecker.nodeHasBodyWithLexicalScope(node)){
+            return true;
+        }
+
+        if((node.type == 'WhileStatement') && node.body){
+            return true;
+        }
+
+        if((node.type == 'SwitchCase') && node.consequent){
+            return true;
+        }
+    
+        return false;
+    }
+
+    static nodeIsFunctionRelated(node){
         if(!node){
             return false;
         }

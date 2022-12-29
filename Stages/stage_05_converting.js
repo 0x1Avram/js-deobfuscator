@@ -150,7 +150,13 @@ class ConvertingObjectExpressionKeysTransformer extends stageDeobfuscator.Transf
         const variableDeclaratorNodes = esquery(this.ast, `VariableDeclaration > VariableDeclarator` + 
             `[id.type='Identifier'][init.type='ObjectExpression']`);
 
+        let nrVarDeclarators = 0;
+        const totalLen = variableDeclaratorNodes.length;
         variableDeclaratorNodes.forEach((variableDeclarator) => {
+            nrVarDeclarators++;
+            if((nrVarDeclarators % 100 == 0) || (nrVarDeclarators == 1)){
+                console.log(`Parsing nrVarDeclarators for base properties = ${nrVarDeclarators}/${totalLen}.`);
+            }
             let objectExpressionNode = variableDeclarator.init;
 
             const expressionStatementNodes = this._getExpressionStatementNodesContainingMemberExpressionWithIdentifier(
@@ -166,12 +172,21 @@ class ConvertingObjectExpressionKeysTransformer extends stageDeobfuscator.Transf
 
                 const keysPath = this._getPropertiesOfExpressionStatementForBasePropertiesExtractor(
                     leftPartOfAssignmentExpression);
-                if(this._addToObjectExpressionNodeForBasePropertiesExtractor(objectExpressionNode, 
-                    keysPath, rightPartOfAssignmentExpression)){
-                    astOperations.ASTModifier.removeSingleNode(expressionStatement, this.logger, this.obfuscatedSourceCode);
+                
+            
+                try{
+                    if(this._addToObjectExpressionNodeForBasePropertiesExtractor(objectExpressionNode, 
+                        keysPath, rightPartOfAssignmentExpression)){
+                        astOperations.ASTModifier.removeSingleNode(expressionStatement, this.logger, this.obfuscatedSourceCode);
+                    }
+                }
+                catch(e){
+                    this.logger.error(`[stage_05_converting.js] Deobfuscation error for ` +
+                    `ConvertingObjectExpressionKeysTransformer. error = ${e}. Stack = \n${e.stack}`);
                 }
             }
         });
+        console.log(`Finished parsing nrVarDeclarators for base properties.`);
     }
 
     _getExpressionStatementNodesContainingMemberExpressionWithIdentifier(variableDeclarator){
@@ -298,9 +313,9 @@ class ConvertingObjectExpressionKeysTransformer extends stageDeobfuscator.Transf
         let i = 0;
         do{
             const key = keysPath[i];
-            searchScope = esquery(objectExpressionToAddTo, `ObjectExpression > Property[key.value=${key}]`);
+            searchScope = esquery(objectExpressionToAddTo, `ObjectExpression > Property[key.value=${JSON.stringify(key)}]`);
             if(searchScope.length == 0){
-                searchScope = esquery(objectExpressionToAddTo, `ObjectExpression > Property[key.name=${key}]`);
+                searchScope = esquery(objectExpressionToAddTo, `ObjectExpression > Property[key.name=${JSON.stringify(key)}]`);
             }
 
             if(searchScope.length == 1){
@@ -322,7 +337,13 @@ class ConvertingObjectExpressionKeysTransformer extends stageDeobfuscator.Transf
         const variableDeclaratorNodes = esquery(this.ast, `VariableDeclaration > VariableDeclarator`
         + `[id.type='Identifier'][init.type='ObjectExpression']`);
 
+        let nrVarDeclarators = 0;
+        const totalLen = variableDeclaratorNodes.length;
         variableDeclaratorNodes.forEach((variableDeclarator) => {
+            nrVarDeclarators++;
+            if((nrVarDeclarators % 100 == 0) || (nrVarDeclarators == 1)){
+                console.log(`Parsing nrVarDeclarators for variable declaration extraction = ${nrVarDeclarators}/${totalLen}.`);
+            }
             const oldIdentifier = variableDeclarator.id.name;
             const variableDeclaration = variableDeclarator.parent;
             const variableKind = variableDeclaration.kind;
@@ -342,6 +363,7 @@ class ConvertingObjectExpressionKeysTransformer extends stageDeobfuscator.Transf
                 this._renameVariableInExpressions(variableDeclarationLexicalScope, oldIdentifier, newIdentifier);
             }
         });    
+        console.log(`Finished parsing nrVarDeclarators for variable declaration extraction.`);
     }
 
     _renameVariableDeclarator(variableDeclarator, newName){

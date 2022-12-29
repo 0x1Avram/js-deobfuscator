@@ -56,6 +56,7 @@ class StageDeobfuscator{
         for (const transformerName in this.transformers){
             const transformerDeobfuscatorObject = this._instantiateTransformerObject(transformerName);
             this.logger.info(`[stage_deobfuscator.js] ${i + 1}/${nrTransformers}) Transform '${transformerName}'.`);
+            console.log(`[stage_deobfuscator.js] ${i + 1}/${nrTransformers}) Transform '${transformerName}'.`);
             try{
                 this._callDeobfuscationForTransformerObject(transformerDeobfuscatorObject, transformerName);
             }
