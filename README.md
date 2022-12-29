@@ -164,6 +164,7 @@ npm install --save-dev @babel/core @babel/cli @babel/preset-env
 }
 ```
 5) Run babel via CLI for transpilation
+
 Example for transpiling 'a.txt' file to 'output.js' file. ('a.txt' is the input file, not parsed by espirma; 'output.js' is the output file, successfully parsed by esprima)
 ```
 npx babel a.txt -o output.js
