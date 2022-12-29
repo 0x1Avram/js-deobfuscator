@@ -939,11 +939,21 @@ class StringArrayCallsReplacer{
         var thisObj = this;
         estraverse.traverse(this.ast, {
             enter: function(node){
-                if(astOperations.NodeChecker.nodeHasBodyWithLexicalScope(node)){
+                if(astOperations.NodeChecker.nodeHasBodyWithLexicalScopeStringArrayCallsReplace(node)){
                     i++;
-                    console.log(`Replacing calls in scope nr. ${i}.`);
-                    thisObj.logger.info(`Replacing calls in scope nr. ${i}.`);
-                    thisObj._fixStringArrayCallsInLexicalScope(node);
+                    if(i % 100 == 0){
+                        console.log(`Replacing calls in scope nr. ${i}.`);
+                        thisObj.logger.info(`Replacing calls in scope nr. ${i}.`);
+                    }
+                    
+                    try{
+                        thisObj._fixStringArrayCallsInLexicalScope(node);
+                    }
+                    catch(e){
+                        thisObj.logger.error(`[stage_03_stringarray.js] Deobfuscation when fixing` + 
+                        ` array calls in scope nr. ${i}'. error = ${e}. Stack = ${e.stack}`); 
+                    }
+                    
                 }
             },
         });
@@ -1073,7 +1083,11 @@ class StringArrayCallsReplacer{
     _getVariableDeclaratorWrappersInScope(node){
         let wrappers = [];
 
-        let body = (node.type == 'Program') ? node.body : node.body.body;
+        let body = this._getNodeBody(node);
+        if(!body){
+            return wrappers;
+        }
+
         for (let i = 0; i < body.length; i++){
             const statement = body[i];
             const variableDeclaratorWrappers = this._getVariableDeclaratorWrappersFromStatement(statement);
@@ -1357,17 +1371,37 @@ class StringArrayCallsReplacer{
     _getFunctionDeclarationWrappersInScope(nodeWithBody){
         let wrappers = [];
 
-        let body = (nodeWithBody.type == 'Program') ? nodeWithBody.body : nodeWithBody.body.body;
+        let body = this._getNodeBody(nodeWithBody);
+        if(!body){
+            return wrappers;
+        }
 
         for (let i = 0; i < body.length; i++){
             const statement = body[i];
-            if(this._nodeIsFunctionDeclarationWrapper(statement)){
+            if(this._nodeIsFunctionDeclarationWrapper(statement)
+              || this._nodeIsExpressionStatementWrapper(statement)){
                 wrappers.push(statement);
                 this.allFunctionWrappers.push(statement);
             }
         }
 
         return wrappers;
+    }
+
+    _getNodeBody(nodeWithBody){
+        let body = null;
+
+        if((nodeWithBody.type == 'Program') || (nodeWithBody.type == 'WhileStatement')){
+            body = nodeWithBody.body;
+        }
+        else if(astOperations.NodeChecker.nodeIsFunctionRelated(nodeWithBody)){
+            body = nodeWithBody.body.body
+        }
+        else if(nodeWithBody.type == 'SwitchCase'){
+            body = nodeWithBody.consequent;
+        }
+
+        return body;
     }
 
     _nodeIsFunctionDeclarationWrapper(node){
@@ -1379,6 +1413,18 @@ class StringArrayCallsReplacer{
             return false;
         }
     
+        return this._isFunctionWrapperNode(node);
+    }
+
+    _isFunctionWrapperNode(node){
+        if(!node || !node.type){
+            return false;
+        }
+
+        if((node.type != 'FunctionDeclaration') && (node.type != 'FunctionExpression')){
+            return false;
+        }
+
         if(!node.params || (node.params.length == 0)){
             return false;
         }
@@ -1403,14 +1449,14 @@ class StringArrayCallsReplacer{
             return false;
         }
     
-        let allFunctionWrapperNames = this._getIdentifierNamesForFunctionDeclarationNodes(this.allFunctionWrappers);
+        let allFunctionWrapperNames = this._getIdentifierNamesForFunctionWrapperNodes(this.allFunctionWrappers);
         return allFunctionWrapperNames.includes(identifier.name);
     }
 
-    _getIdentifierNamesForFunctionDeclarationNodes(functionDeclarationNodes){
+    _getIdentifierNamesForFunctionWrapperNodes(functionWrapperNodes){
         let names = [];
-        for(let i = 0; i < functionDeclarationNodes.length; i++){
-            const node = functionDeclarationNodes[i];
+        for(let i = 0; i < functionWrapperNodes.length; i++){
+            const node = functionWrapperNodes[i];
             if(typeof node == 'string'){
                 names.push(node);
             }
@@ -1425,6 +1471,21 @@ class StringArrayCallsReplacer{
     }
 
     _getIdentifierNameForFunctionWrapper(node){
+        if(!node || !node.type){
+            return null;
+        }
+        
+        if(node.type == 'FunctionDeclaration'){
+            return this._getIdentifierNameForFunctionDeclarationWrapperNode(node);
+        }
+        else if(node.type == 'ExpressionStatement'){
+            return this._getIdentifierNameForExpressionStatementWrapperNode(node);
+        }
+        
+        return null;
+    }
+
+    _getIdentifierNameForFunctionDeclarationWrapperNode(node){
         if(!node || (node.type != 'FunctionDeclaration')){
             return null;
         }
@@ -1439,6 +1500,54 @@ class StringArrayCallsReplacer{
         }
         
         return identifier.name;
+    }
+
+    _getIdentifierNameForExpressionStatementWrapperNode(node){
+        if(!node || (node.type != 'ExpressionStatement')){
+            return null;
+        }
+
+        if(!node.expression || !node.expression.type 
+           || (node.expression.type != 'AssignmentExpression')){
+            return null;
+        }
+        
+        const expression = node.expression;
+        if(!expression.left || !expression.left.type || !expression.left.name
+            || (expression.left.type != 'Identifier')){
+             return null;
+        }
+
+        return expression.left.name;
+    }
+
+    _nodeIsExpressionStatementWrapper(node){
+        if(!node){
+            return false;
+        }
+
+        if(!node.type || (node.type != 'ExpressionStatement')){
+            return false;
+        }
+
+        if(!node.expression || !node.expression.type 
+           || (node.expression.type != 'AssignmentExpression')){
+            return false;
+        }
+
+        const expression = node.expression;
+        
+        if(!expression.left || !expression.left.type || (expression.left.type != 'Identifier')){
+            return false;
+        }
+
+        if(!expression.right || !expression.right.type 
+          || (expression.right.type != 'FunctionExpression')){
+              return false;
+        }
+
+        return this._isFunctionWrapperNode(expression.right);
+        
     }
 
     _addFunctionDeclarationWrappersToExecutionContext(wrappers){
@@ -1468,8 +1577,8 @@ class StringArrayCallsReplacer{
     _getFunctionWrapperCallsInScope(nodeWithBody, currentNodeFunctionWrappers){
         let wrapperCalls = [];
 
-        const curentNodeWrapperNames = this._getIdentifierNamesForFunctionDeclarationNodes(currentNodeFunctionWrappers);
-        const allWrapperNames = this._getIdentifierNamesForFunctionDeclarationNodes(this.allFunctionWrappers);
+        const curentNodeWrapperNames = this._getIdentifierNamesForFunctionWrapperNodes(currentNodeFunctionWrappers);
+        const allWrapperNames = this._getIdentifierNamesForFunctionWrapperNodes(this.allFunctionWrappers);
         let wrapperNamesForSearching = this._getFunctionWrapperNamesToSearchInCurrentScope(nodeWithBody, 
             curentNodeWrapperNames, allWrapperNames);
 

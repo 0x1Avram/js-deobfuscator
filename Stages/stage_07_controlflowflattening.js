@@ -39,6 +39,7 @@ class ControlFlowFlatteningFunctionControlFlowTransformer extends stageDeobfusca
             const replacerClass = controlFlowReplacerClasses[className];
             const replacerObject = new replacerClass(this.logger, this.obfuscatedSourceCode, this.ast, this.argv);
             this.logger.info(`[stage_07_controflowflattening.js] ${i + 1}/4) Replacer '${className}'.`);
+            console.log(`[stage_07_controflowflattening.js] ${i + 1}/4) Replacer '${className}'.`);
             try{
                 this.sourceCodeBeforeReplacer = astOperations.ASTSourceCodeOperations.generateSourceCodeFromAST(this.ast);
                 replacerObject.deobfuscate();
@@ -151,11 +152,20 @@ class ControlFlowFlatteningBinaryExpressionControlFlowReplacer extends FunctionC
     }
 
     deobfuscate(){
+        let nrIterations = 0;
         do{
+            nrIterations++;
+            console.log(`[stage_07][ControlFlowFlatteningBinaryExpressionControlFlowReplacer] nrIterations = ${nrIterations}.`);
             var foundControlFlowFlattenedBinaryExpresion = false;
             const binaryExpressionNodes = esquery(this.ast, `VariableDeclaration > VariableDeclarator > ObjectExpression > ` + 
             `Property[key.type='Identifier'] > FunctionExpression > BlockStatement > ReturnStatement > BinaryExpression`);
+            const totalBinaryExpressions = binaryExpressionNodes.length;
+            let nrExpr = 0;
             binaryExpressionNodes.forEach((binaryExpressionNode) => {
+                nrExpr++;
+                if(nrExpr == 1 || nrExpr % 100 == 0){
+                    console.log(`[stage_07][ControlFlowFlatteningBinaryExpressionControlFlowReplacer] nrExpr = ${nrExpr}/${totalBinaryExpressions}.`);
+                }
                 if(!this._binaryExpressionWasCFFlattened(binaryExpressionNode)){
                     return;
                 }
@@ -254,12 +264,22 @@ class ControlFlowFlatteningCallExpressionControlFlowReplacer extends FunctionCon
     }
 
     deobfuscate(){
+        let nrIterations = 0;
         do{
+            nrIterations++;
+            console.log(`[stage_07][ControlFlowFlatteningCallExpressionControlFlowReplacer] nrIterations = ${nrIterations}.`);
             var foundControlFlowFlattenedCallExpression = false; 
             
             const callExpressionNodes = esquery(this.ast, `VariableDeclaration > VariableDeclarator > ObjectExpression > ` + 
             `Property[key.type='Identifier'] > FunctionExpression > BlockStatement > ReturnStatement > CallExpression`);
+            const totalNrCalls = callExpressionNodes.length;
+            let currentNrCalls = 0;
             callExpressionNodes.forEach((callExpression) => {
+                currentNrCalls++;
+                if((currentNrCalls == 1) || (currentNrCalls % 100 == 0)){
+                    console.log(`[stage_07][ControlFlowFlatteningCallExpressionControlFlowReplacer] currentNrCalls = ${currentNrCalls}/${totalNrCalls}.`);
+                }
+
                 if(!this._callExpressionWasCFFlattened(callExpression)){
                     return;
                 }
@@ -338,12 +358,22 @@ class ControlFlowFlatteningLogicalExpressionControlFlowReplacer extends Function
     }
 
     deobfuscate(){
+        let nrIterations = 0;
         do{
+            nrIterations++;
+            console.log(`[stage_07][ControlFlowFlatteningLogicalExpressionControlFlowReplacer] nrIterations = ${nrIterations}.`);
             var foundControlFlowFlattenedLogicalExpression = false;
             
             const logicalExpressionNodes = esquery(this.ast, `VariableDeclaration > VariableDeclarator > ObjectExpression > ` +
             `Property[key.type='Identifier'] > FunctionExpression > BlockStatement > ReturnStatement > LogicalExpression`);
+            const totalNrLogicalExpressions = logicalExpressionNodes.length;
+            let currentNrLogicalExpressions = 0;
             logicalExpressionNodes.forEach((logicalExpressiion) => {
+                currentNrLogicalExpressions++;
+                if((currentNrLogicalExpressions == 1) || (currentNrLogicalExpressions % 100 == 0)){
+                    console.log(`[stage_07][ControlFlowFlatteningLogicalExpressionControlFlowReplacer] currentNrLogicalExpressions = ` + 
+                                `${currentNrLogicalExpressions}/${totalNrLogicalExpressions}.`);
+                }
                 if(!this._logicalExpressionWasControlFlowFlattened(logicalExpressiion)){
                     return;
                 }
@@ -421,13 +451,24 @@ class ControlFlowFlatteningStringLiteralControlFlowReplacer extends FunctionCont
     }
 
     deobfuscate(){
+        let nrIterations = 0;
         do{
+            nrIterations++;
+            console.log(`[stage_07][ControlFlowFlatteningStringLiteralControlFlowReplacer] nrIterations = ${nrIterations}.`);
             var foundControlFlowFlattenedCallExpression = false; 
             
             const literalNodes = esquery(this.ast, `VariableDeclaration > VariableDeclarator > ObjectExpression > ` + 
             `Property[key.type='Identifier'] > Literal`);
-    
+            const totalNrLiteralNodes = literalNodes.length;
+            let currentNrLiteralNodes = 0;
+
             literalNodes.forEach((stringLiteralNode) => {
+                currentNrLiteralNodes++;
+                if((currentNrLiteralNodes == 1) || (currentNrLiteralNodes % 100 == 0)){
+                    console.log(`[stage_07][ControlFlowFlatteningCallExpressionControlFlowReplacer] currentNrCalls = ` + 
+                                `${currentNrLiteralNodes}/${totalNrLiteralNodes}.`);
+                }
+
                 if(typeof stringLiteralNode.value != 'string'){
                     return;
                 }
