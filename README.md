@@ -147,7 +147,7 @@ However, older versions of the obfuscator may output a different AST and that mi
 
 There are some scenarios where the deobfuscator might crash because an AST cannot be generated from the input. This is a limitation from the esprima parser used by the deobfuscator which does not support all new JavaScript features. If this error is encountered, a message suggesting that the code needs to be transpiled before deobfuscation will be displayed. The transpilation to an older JavaScript version for which esprima correctly parses the script can be done using [Babel](https://babeljs.io/) and the parsing of the script can be checked with tools such as [astexplorer](https://astexplorer.net/).
 
-# Easy transpilation with babel:
+### Easy transpilation with babel:
 1) Create directory with the file you are trying to deobfuscate inside directory
 2) Initialize node project with default configuration:
 ```
@@ -165,7 +165,7 @@ npm install --save-dev @babel/core @babel/cli @babel/preset-env
 ```
 5) Run babel via CLI for transpilation
 
-Example for transpiling 'a.txt' file to 'output.js' file. ('a.txt' is the input file, not parsed by espirma; 'output.js' is the output file, successfully parsed by esprima)
+Example for transpiling 'a.txt' file to 'output.js' file. ('a.txt' is the input file, not parsed by espirma; 'output.js' is the output file, successfully parsed by esprima):
 ```
 npx babel a.txt -o output.js
 ```
