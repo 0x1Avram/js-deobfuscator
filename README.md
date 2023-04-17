@@ -160,7 +160,8 @@ npm install --save-dev @babel/core @babel/cli @babel/preset-env
 4) Create '.babelrc' file inside directory with the following content
 ```
 {
-  "presets": ["@babel/preset-env"]
+  "presets": ["@babel/preset-env"],
+  "compact": false
 }
 ```
 5) Run babel via CLI for transpilation
